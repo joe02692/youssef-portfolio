@@ -3,6 +3,7 @@ name: Deploy Next.js site to Pages
 on:
   push:
     branches: ["main"]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -22,11 +23,15 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
+          cache: npm
       - name: Install dependencies
         run: npm ci
       - name: Build with Next.js
         run: npm run build
+        env:
+          # The site is served from https://<user>.github.io/<repo>/
+          NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
       - name: Upload Artifacts
         uses: actions/upload-pages-artifact@v3
         with:
