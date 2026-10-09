@@ -1,0 +1,542 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* ---- Themes -------------------------------------------------------------
+   Light is the default. The header toggle sets data-theme="dark" on <html>
+   (see components/theme-toggle.tsx and the inline script in app/layout.tsx). */
+
+:root {
+  color-scheme: light;
+  --page: #f5f7fc;
+  --surface: #ffffff;
+  --raised: #edf1fa;
+  --line: rgb(24 40 96 / 0.13);
+  --fg: #0c1326;
+  --muted: #47526f;
+  --dim: #626d8a;
+  --primary: #2563eb;
+  --secondary: #7c3aed;
+  --tertiary: #0b7499;
+  --danger: #c8203c;
+  --ok: #0a7d52;
+  --on-primary: #ffffff;
+  --card-shadow:
+    0 1px 2px rgb(16 24 64 / 0.05), 0 14px 34px -20px rgb(16 24 64 / 0.22);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #05070f;
+  --surface: #0a0e1b;
+  --raised: #10162a;
+  --line: rgb(130 150 255 / 0.16);
+  --fg: #e8ebf7;
+  --muted: #9aa3c2;
+  --dim: #7c85a6;
+  --primary: #4da3ff;
+  --secondary: #a970ff;
+  --tertiary: #63e6ff;
+  --danger: #ff7a90;
+  --ok: #5fe3a1;
+  --on-primary: #05070f;
+  --card-shadow: none;
+}
+
+@theme inline {
+  --color-page: var(--page);
+  --color-surface: var(--surface);
+  --color-raised: var(--raised);
+  --color-line: var(--line);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-dim: var(--dim);
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-tertiary: var(--tertiary);
+  --color-danger: var(--danger);
+  --color-ok: var(--ok);
+  --color-on-primary: var(--on-primary);
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", monospace;
+  --font-display: var(--font-sora), var(--font-geist-sans), sans-serif;
+}
+
+@layer base {
+  html {
+    /* Keeps anchored sections clear of the fixed header. */
+    scroll-padding-top: 5.5rem;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  body {
+    background: var(--page);
+    color: var(--fg);
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--primary) 30%, transparent);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 3px;
+  }
+}
+
+/* The theme switch draws its own reveal (see theme-toggle.tsx). */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+@layer components {
+  .text-gradient {
+    background-image: linear-gradient(100deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .eyebrow {
+    @apply flex items-center gap-3 font-mono text-xs uppercase tracking-[0.22em] text-primary;
+  }
+
+  .eyebrow::before {
+    content: "";
+    width: 1.75rem;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--primary));
+  }
+
+  .card {
+    @apply rounded-2xl border border-line bg-surface/80;
+    box-shadow: var(--card-shadow);
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-line bg-raised/70 px-3 py-1 text-[0.8125rem] leading-5 text-fg;
+  }
+
+  .tag {
+    @apply rounded-md border border-line bg-page/70 px-2 py-0.5 font-mono text-[0.6875rem] leading-5 text-muted;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-medium transition duration-200;
+  }
+
+  .btn-primary {
+    @apply text-on-primary;
+    background-image: linear-gradient(100deg, var(--primary), var(--secondary));
+  }
+
+  .btn-primary:hover {
+    filter: brightness(1.08);
+    box-shadow: 0 10px 30px -10px
+      color-mix(in srgb, var(--primary) 75%, transparent);
+    translate: 0 -1px;
+  }
+
+  .btn-ghost {
+    @apply border border-line bg-surface/60 text-fg;
+  }
+
+  .btn-ghost:hover {
+    @apply border-primary/60 bg-primary/10;
+  }
+
+  .icon-btn {
+    @apply inline-flex size-10 items-center justify-center rounded-full border border-line bg-surface/60 text-muted transition duration-200;
+  }
+
+  .icon-btn:hover {
+    @apply border-primary/60 bg-primary/10 text-fg;
+  }
+
+  /* ---- Background ---------------------------------------------------- */
+
+  .bg-grid {
+    background-image: radial-gradient(
+      color-mix(in srgb, var(--primary) 22%, transparent) 1px,
+      transparent 1px
+    );
+    background-size: 28px 28px;
+    mask-image: linear-gradient(to bottom, black 10%, transparent 90%);
+  }
+
+  /* ---- Header -------------------------------------------------------- */
+
+  /* aria-current is set by the header's IntersectionObserver. */
+  .nav-link {
+    @apply relative text-muted transition-colors duration-200;
+  }
+
+  .nav-link:hover,
+  .nav-link[aria-current="true"] {
+    @apply text-fg;
+  }
+
+  .nav-link--bar::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    bottom: -0.5rem;
+    height: 2px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .nav-link--bar[aria-current="true"]::after {
+    opacity: 1;
+  }
+
+  /* Shown only where scroll timelines exist (see Motion below). */
+  .scroll-progress {
+    display: none;
+    position: absolute;
+    inset-inline: 0;
+    bottom: -1px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    transform-origin: 0 50%;
+  }
+
+  /* ---- Project cards ------------------------------------------------- */
+
+  .spotlight {
+    position: relative;
+    isolation: isolate;
+    transition:
+      border-color 0.25s,
+      translate 0.25s,
+      box-shadow 0.25s;
+  }
+
+  .spotlight::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: radial-gradient(
+      420px circle at var(--mx, 50%) var(--my, 0%),
+      color-mix(in srgb, var(--primary) 16%, transparent),
+      transparent 62%
+    );
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+
+  .spotlight:hover,
+  .spotlight:focus-within {
+    border-color: color-mix(in srgb, var(--primary) 55%, transparent);
+    box-shadow: 0 22px 50px -28px
+      color-mix(in srgb, var(--primary) 70%, transparent);
+    translate: 0 -4px;
+  }
+
+  .spotlight:hover::before,
+  .spotlight:focus-within::before {
+    opacity: 1;
+  }
+
+  /* ---- Contact form -------------------------------------------------- */
+
+  .field-input {
+    @apply w-full rounded-xl border border-line bg-page/70 px-4 py-3 text-[0.9375rem] text-fg;
+    transition:
+      border-color 0.2s,
+      box-shadow 0.2s;
+  }
+
+  .field-input::placeholder {
+    color: var(--dim);
+  }
+
+  .field-input:focus-visible {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 22%, transparent);
+  }
+
+  /* Validation shows only after the visitor has interacted with a field. */
+  .field-input:user-valid {
+    border-color: color-mix(in srgb, var(--ok) 60%, transparent);
+  }
+
+  .field-input:user-invalid {
+    border-color: var(--danger);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 16%, transparent);
+  }
+
+  .field-error {
+    @apply mt-2 hidden items-center gap-1.5 text-[0.8125rem] text-danger;
+  }
+
+  .field-input:user-invalid ~ .field-error {
+    display: flex;
+  }
+
+  /* ---- Tech ticker --------------------------------------------------- */
+
+  .marquee {
+    --gap: 2.75rem;
+    display: flex;
+    gap: var(--gap);
+    overflow: hidden;
+    mask-image: linear-gradient(
+      90deg,
+      transparent,
+      black 12%,
+      black 88%,
+      transparent
+    );
+  }
+
+  .marquee-track {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: var(--gap);
+    min-width: 100%;
+    justify-content: space-around;
+  }
+
+  /* ---- System diagram ------------------------------------------------ */
+
+  .trace {
+    fill: none;
+    stroke: color-mix(in srgb, var(--primary) 36%, transparent);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .trace-pulse {
+    fill: none;
+    stroke: var(--tertiary);
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 9 91;
+    opacity: 0;
+    filter: drop-shadow(
+      0 0 4px color-mix(in srgb, var(--tertiary) 85%, transparent)
+    );
+  }
+
+  .orbit {
+    transform-box: view-box;
+    transform-origin: 240px 244px;
+  }
+}
+
+/* ---- Scroll reveal -------------------------------------------------------
+   components/scroll-reveal.tsx adds .reveal-pending to .reveal elements that
+   start below the fold, then swaps it for .reveal-in as they scroll into view. */
+
+[data-reveal="left"] {
+  --reveal-x: -56px;
+  --reveal-y: 0px;
+}
+
+[data-reveal="right"] {
+  --reveal-x: 56px;
+  --reveal-y: 0px;
+}
+
+[data-reveal="zoom"] {
+  --reveal-y: 28px;
+  --reveal-scale: 0.92;
+}
+
+.reveal-pending {
+  opacity: 0;
+  translate: var(--reveal-x, 0px) var(--reveal-y, 44px);
+  scale: var(--reveal-scale, 1);
+}
+
+.reveal-in {
+  transition:
+    opacity 0.8s ease,
+    translate 0.8s cubic-bezier(0.2, 0.7, 0.2, 1),
+    scale 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition-delay: calc(var(--i, 0) * 90ms);
+}
+
+/* ---- Motion --------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  /* Static list instead of a moving ticker. */
+  .marquee {
+    mask-image: none;
+  }
+
+  .marquee-track {
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: 0.75rem;
+  }
+
+  .marquee-track[aria-hidden="true"] {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes rise {
+    from {
+      opacity: 0;
+      translate: 0 18px;
+    }
+  }
+
+  /* Hero entrance: staggered with --i. */
+  .rise {
+    animation: rise 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation-delay: calc(var(--i, 0) * 90ms);
+  }
+
+  @keyframes trace-flow {
+    from {
+      stroke-dashoffset: 100;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  .trace-pulse {
+    opacity: 1;
+    animation: trace-flow 3.6s linear infinite;
+  }
+
+  @keyframes spin {
+    to {
+      rotate: 360deg;
+    }
+  }
+
+  .orbit {
+    animation: spin 46s linear infinite;
+  }
+
+  .orbit-fast {
+    animation-duration: 14s;
+    animation-direction: reverse;
+  }
+
+  @keyframes bob {
+    50% {
+      translate: 0 -10px;
+    }
+  }
+
+  .float {
+    animation: bob 7s ease-in-out infinite;
+  }
+
+  @keyframes drift-a {
+    to {
+      translate: 9% 12%;
+      scale: 1.14;
+    }
+  }
+
+  @keyframes drift-b {
+    to {
+      translate: -14% -10%;
+      scale: 0.88;
+    }
+  }
+
+  .blob-a {
+    animation: drift-a 17s ease-in-out infinite alternate;
+  }
+
+  .blob-b {
+    animation: drift-b 21s ease-in-out infinite alternate;
+  }
+
+  @keyframes marquee {
+    to {
+      translate: calc(-100% - var(--gap)) 0;
+    }
+  }
+
+  .marquee-track {
+    animation: marquee 42s linear infinite;
+  }
+
+  .marquee:hover .marquee-track,
+  .marquee:focus-within .marquee-track {
+    animation-play-state: paused;
+  }
+
+  /* Scroll-linked effects are decorative, so browsers without scroll
+     timelines simply skip them. */
+  @supports (animation-timeline: scroll()) {
+    @keyframes grow-progress {
+      from {
+        transform: scaleX(0);
+      }
+      to {
+        transform: scaleX(1);
+      }
+    }
+
+    .scroll-progress {
+      display: block;
+      animation: grow-progress auto linear both;
+      animation-timeline: scroll(root block);
+    }
+  }
+
+  @supports ((animation-timeline: view()) and (animation-range: entry)) {
+    /* Hero parallax: the two columns leave at different speeds. Desktop only —
+       on small screens the columns stack and are read while scrolling. */
+    @media (min-width: 64rem) {
+      @keyframes hero-text-out {
+        to {
+          opacity: 0.2;
+          translate: 0 -80px;
+        }
+      }
+
+      @keyframes hero-art-out {
+        to {
+          opacity: 0.35;
+          translate: 0 70px;
+          scale: 0.93;
+        }
+      }
+
+      .hero {
+        view-timeline: --hero block;
+      }
+
+      .hero-text {
+        animation: hero-text-out linear both;
+        animation-timeline: --hero;
+        animation-range: exit 0% exit 100%;
+      }
+
+      .hero-art {
+        animation: hero-art-out linear both;
+        animation-timeline: --hero;
+        animation-range: exit 0% exit 100%;
+      }
+    }
+  }
+}
